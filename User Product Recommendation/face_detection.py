@@ -1,4 +1,5 @@
-from datetime import datetime
+import warnings
+warnings.filterwarnings('ignore')
 
 from PIL import Image
 
@@ -13,16 +14,10 @@ from sklearn.preprocessing import Normalizer
 
 import pickle
 
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
-
 model = pickle.loads(open('models/trained_facenet_model', "rb").read())
 facenet_model = load_model('models/keras-facenet/model/facenet_keras.h5', compile=False)
 data = load('trained_embeddings/celebrity-faces-embeddings.npz')
 labels = data['arr_1']
-
-threshold = 70
-test_image = r'C:\Users\Gray\Data Science Projects\User Product Recommendation\test_images\Arnold_Schwarzenegger_0035.jpg'
 
 # create the detector, using default weights
 detector = MTCNN()
@@ -63,7 +58,7 @@ def get_embedding(model, face_pixels):
 	yhat = model.predict(samples)
 	return yhat[0]
 
-def run(embedding, image, threshold_percentage=0):
+def predict(embedding, image, threshold_percentage=0):
     # prediction for the face
     yhat_class = model.predict(embedding)
     yhat_prob = model.predict_proba(embedding)
@@ -75,15 +70,12 @@ def run(embedding, image, threshold_percentage=0):
     class_index = yhat_class[0]
     class_probability = yhat_prob[0,class_index] * 100
     predict_names = out_encoder.inverse_transform(yhat_class)
-    print('Predicted: %s (%.3f)' % (predict_names[0], class_probability))
-    
-    if class_probability < threshold_percentage:
-        predict_names[0] = 'Unknown'
+#     print('Predicted: %s (%.3f)' % (predict_names[0], class_probability))
         
-    return (predict_names[0], class_probability)
+    return {'name':predict_names[0], 'probability':class_probability}
 
 
-def main():
+def detect(test_image):
     test_pixels = extract_face(test_image)
 
     test_embeddings =  get_embedding(facenet_model, test_pixels)
@@ -92,9 +84,6 @@ def main():
     in_encoder = Normalizer(norm='l2')
     test_embeddings = in_encoder.transform([test_embeddings])
 
-    result = run(test_embeddings, test_pixels, threshold)
+    result = predict(test_embeddings, test_pixels)
     return result
-    
-
-if __name__ == '__main__':
-    main()
+  

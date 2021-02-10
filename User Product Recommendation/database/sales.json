@@ -1,0 +1,16 @@
+{
+    "David_Beckham": {
+        "customer_id": 1,
+        "products": [711158472,
+                     711159460,
+                     711179024
+        ]
+    },
+    
+    "Serena_Williams": {
+        "customer_id": 2,
+        "products": [713184742,
+                     713189334
+        ]
+    }
+}
